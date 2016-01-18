@@ -23,8 +23,9 @@ import android.util.Log;
 
 public class NetworkManager extends CordovaPlugin {
     private static final String Wifi_Lists = "getWifiList";
-     private static final String ConfigNewWifi = "configNewWifi";
+    private static final String ConfigNewWifi = "configNewWifi";
     private WifiManager wifiManager;
+    private static final String TAG = "NetworkManager";
     private CallbackContext callbackContext;
 
         @Override
@@ -80,53 +81,125 @@ public class NetworkManager extends CordovaPlugin {
         * Config New Wifi
         ***/
        private boolean configNewWifiNetwork(CallbackContext callbackContext, JSONArray data) {
+         try {
 
-          try {
-          String ssid = data.getString(0);
-          String security = data.getString(1);
-          String pass = data.getString(2);
+            String ssid = data.getString(0);
+            String security = data.getString(1);
+            String pass = data.getString(2);
 
-          // setup a wifi configuration
-          WifiConfiguration wc = new WifiConfiguration();
+            // setup a wifi configuration
+            WifiConfiguration wc = new WifiConfiguration();
 
-          wc.SSID = ssid;
-          wc.preSharedKey  = pass;
-          wc.BSSID = security;
-          wc.priority = 1;
-          wc.networkId  = isSSIDExists(ssid);
+            // basic settings
+            wc.SSID = "\"".concat(ssid).concat("\"");
+            wc.status = WifiConfiguration.Status.DISABLED;
+            wc.priority = 40;
 
-          wc.status = WifiConfiguration.Status.DISABLED;
-          wc.status = WifiConfiguration.Status.CURRENT;
-         wc.status = WifiConfiguration.Status.ENABLED;
-         wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
-         wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-         wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-          wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
-         wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-         wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-         wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.NONE);
-          wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-          wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-          wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
-         wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
-         wc.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
-          wc.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
-          wc.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.LEAP);
+            if(security.equals("WPA") || security.equals("WPA2")){
+              Log.d(TAG, " Security Type is WPA/WPA2");
 
-             wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
               wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-          if(wc.networkId == -1 ){
-          // connect to and enable the connection
-            int netId = wifiManager.addNetwork(wc);
-            wifiManager.enableNetwork(netId, true);
-            wifiManager.setWifiEnabled(true);
-            callbackContext.success(ssid + " added successfully ");
-          } else {
-            wifiManager.updateNetwork(wc);
-            callbackContext.success(ssid + " updated successfully");
-          }
-          wifiManager.saveConfiguration();
-          return true;
+              wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+              wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+              wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+              wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+              wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+              wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+              wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+              wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+
+              wc.preSharedKey = "\"".concat(pass).concat("\"");
+
+              // connect wifi
+              int networkId = wifiManager.addNetwork(wc);
+              if (networkId != -1) {
+                wifiManager.disconnect();
+                wifiManager.enableNetwork(networkId, true);
+                wifiManager.reconnect();
+                Log.d("TAG", "SSID " + ssid + " Security " + security + " Pass " + pass );
+                callbackContext.success("SSID " + ssid + " Security " + security + " Pass " + pass + " added successfully ");
+              } else {
+                wifiManager.updateNetwork(wc);
+                callbackContext.success("SSID " + ssid + " Security " + security + " Pass " + pass + " updated successfully");
+              }
+
+            } else if(security.equals("WEP")){
+              Log.d(TAG, " Security Type is WEP");
+
+              wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+              wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+              wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+              wc.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+              wc.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+              wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+              wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+              wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+              wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+
+              wc.wepKeys[0] = "\"" + pass + "\""; ;
+              wc.wepTxKeyIndex = 0;
+
+               // connect wifi
+              int networkId = wifiManager.addNetwork(wc);
+              if (networkId != -1) {
+                wifiManager.disconnect();
+                wifiManager.enableNetwork(networkId, true);
+                wifiManager.reconnect();
+                Log.d("TAG", "SSID " + ssid + " Security " + security + " Pass " + pass );
+                callbackContext.success("SSID " + ssid + " Security " + security + " Pass " + pass + " added successfully ");
+              } else {
+                wifiManager.updateNetwork(wc);
+                callbackContext.success("SSID " + ssid + " Security " + security + " Pass " + pass + " updated successfully");
+              }
+
+            } else if(security.equals("ESS")){
+              Log.d(TAG, " Security Type is ESS Open Wifi ");
+              // open wifi
+              wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+              wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+              wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+              wc.allowedAuthAlgorithms.clear();
+              wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+              wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+              wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+              wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+              wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+              wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+
+               // connect wifi
+              int networkId = wifiManager.addNetwork(wc);
+              if (networkId != -1) {
+                wifiManager.disconnect();
+                wifiManager.enableNetwork(networkId, true);
+                wifiManager.reconnect();
+                Log.d("TAG", "SSID " + ssid + " Security " + security + " Pass " + pass );
+                callbackContext.success("SSID " + ssid + " Security " + security + " Pass " + pass + " added successfully ");
+              } else {
+                wifiManager.updateNetwork(wc);
+                callbackContext.success("SSID " + ssid + " Security " + security + " Pass " + pass + " updated successfully");
+              }
+
+            }else {
+              Log.d(TAG, "Security Type Not Supported.");
+              callbackContext.error("Security Type Not Supported.: " + security);
+              return false;
+            }
+
+
+
+              if(wc.networkId == -1 ){
+              // connect to and enable the connection
+                int netId = wifiManager.addNetwork(wc);
+                wifiManager.disconnect();
+                wifiManager.enableNetwork(netId, true);
+                wifiManager.reconnect();
+                callbackContext.success(ssid + " " + security + " added successfully ");
+              } else {
+                wifiManager.updateNetwork(wc);
+                callbackContext.success(ssid + " " + security + " updated successfully");
+              }
+              wifiManager.saveConfiguration();
+              return true;
          } catch (Exception e) {
             callbackContext.error(e.getMessage());
             return false;
