@@ -34,7 +34,7 @@ Retrieves a list of the available networks as an array of objects:
 
 Add the network to the lists
 
-`wifi` needs to be an object
+`wifi` needs to be an object Currently, WPA,WPA2,WEP,ESS is supported for the algorithm.
 
     var wifi = {
         SSID : "demo" ,
