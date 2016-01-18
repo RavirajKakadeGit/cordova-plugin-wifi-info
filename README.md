@@ -22,7 +22,7 @@ Install the plugin
 
 Retrieves a list of the available networks as an array of objects:
 
-    networks = [
+    [
         {   "SSID": ssid,
             "BSSID": bssid,
             "frequency": frequency,
