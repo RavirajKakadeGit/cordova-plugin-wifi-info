@@ -1,29 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
-        id="com.wifi.info"
-        version="0.7.0">
+        id="com.ravi.nm"
+        version="0.1.0">
 
-  <name>Wifi Info</name>
+  <name>Network Manager</name>
+  <description>Cordova Plugin for Network Manager</description>
+  <author>Raviraj Kakade</author>
 
   <engines>
     <engine name="cordova" version=">=3.4.0"/>
   </engines>
 
-  <asset src="www/WifiInfo.js" target="js/WifiInfo.js"/>
+  <asset src="www/NetworkManager.js" target="js/NetworkManager.js"/>
 
-  <js-module src="www/WifiInfo.js" name="wifi-info">
-    <clobbers target="wifi-info" />
+  <js-module src="www/NetworkManager.js" name="NetworkManager">
+    <clobbers target="window.NetworkManager" />
   </js-module>
 
   <platform name="android">
 
-    <config-file target="res/xml/config.xml" parent="/*">
-      <feature name="WifiInfo">
-        <param name="android-package" value="com.plugin.plugin.WifiInfo"/>
+      <config-file target="AndroidManifest.xml" parent="/manifest">
+          <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+          <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+          <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+      </config-file>
+
+
+      <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="NetworkManager">
+        <param name="android-package" value="com.ravi.nm.NetworkManager"/>
       </feature>
     </config-file>
 
-    <source-file src="src/android/WifiInfo.java" target-dir="src/com/wifi/plugin/"/>
+    <source-file src="src/android/com/ravi/nm/NetworkManager.java" target-dir="src/com/ravi/nm"/>
   </platform>
 
 </plugin>
