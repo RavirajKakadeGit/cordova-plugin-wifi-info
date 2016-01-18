@@ -145,11 +145,11 @@ public class NetworkManager extends CordovaPlugin {
                 wifiManager.disconnect();
                 wifiManager.enableNetwork(networkId, true);
                 wifiManager.reconnect();
-                Log.d("TAG", "SSID " + ssid + " Security " + security + " Pass " + pass );
-                callbackContext.success("SSID " + ssid + " Security " + security + " Pass " + pass + " added successfully ");
+                Log.d("TAG", "SSID " + ssid + " Security " + security );
+                callbackContext.success(ssid +  " added successfully ");
               } else {
                 wifiManager.updateNetwork(wc);
-                callbackContext.success("SSID " + ssid + " Security " + security + " Pass " + pass + " updated successfully");
+                callbackContext.success(ssid + " updated successfully");
               }
 
             } else if(security.equals("ESS")){
