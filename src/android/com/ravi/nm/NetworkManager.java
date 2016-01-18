@@ -206,19 +206,5 @@ public class NetworkManager extends CordovaPlugin {
           }
        }
 
-       /**
-        *   Verify if SSID is already exists
-        */
-           private int isSSIDExists(String SSID) {
-               List<WifiConfiguration> wifiList = wifiManager.getConfiguredNetworks();
-               int exists = -1;
-               for (WifiConfiguration wifiConfig : wifiList) {
-                   if ( wifiConfig.SSID.equals(SSID) ) {
-                       exists = wifiConfig.networkId;
-                   }
-               }
-               return exists;
-           }
-
 }
 
