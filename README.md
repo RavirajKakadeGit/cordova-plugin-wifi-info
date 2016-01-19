@@ -30,6 +30,11 @@ Retrieves a list of the available networks as an array of objects:
         }
     ]
 
+#### `NetworkManager.getConnectionInfo(win,fail);`
+
+Retrieves connected wifi information :
+
+
 #### `NetworkManager.addWifiNetwork(wifi, win, fail);`
 
 Add the network to the lists
