@@ -11,6 +11,12 @@ var NetworkManager = {
     },
 
   /***
+   * Get connection info
+   */
+  getConnectionInfo : function (win,fail) {
+    cordova.exec(win,fail,'NetworkManager','getConnectionInfo',[]);
+  },
+  /***
    *
    * @param wifi - wifi object e.g var wifi = { SSID : "demo" , algorithm : "WPA" , pass : "****" }
    * @param win

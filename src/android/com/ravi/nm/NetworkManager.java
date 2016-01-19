@@ -24,6 +24,7 @@ import android.util.Log;
 public class NetworkManager extends CordovaPlugin {
     private static final String Wifi_Lists = "getWifiList";
     private static final String ConfigNewWifi = "configNewWifi";
+    private static final String Connection_Info = "getConnectionInfo";
     private WifiManager wifiManager;
     private static final String TAG = "NetworkManager";
     private CallbackContext callbackContext;
@@ -44,6 +45,8 @@ public class NetworkManager extends CordovaPlugin {
                 return this.getWifiDetails(callbackContext,data);
             } else if(action.equals(ConfigNewWifi)){
                 return this.configNewWifiNetwork(callbackContext,data);
+            } else if(action.equals(Connection_Info)){
+                return this.getConnectionInfo(callbackContext,data);
             } else {
                 callbackContext.error("Incorrect action parameter: " + action);
             }
@@ -56,12 +59,21 @@ public class NetworkManager extends CordovaPlugin {
         **/
         private boolean getWifiDetails(CallbackContext callbackContext, JSONArray data) {
                 List<ScanResult> scanResults = wifiManager.getScanResults();
+                WifiInfo wifiInfo = wifiManager.getConnectionInfo ();
+                String ssid = wifiInfo.getSSID();
+                ssid = ssid.replaceAll("^\"|\"$", "");
                 JSONArray wifiLists = new JSONArray();
-
                 for (ScanResult scan : scanResults) {
                     JSONObject obj = new JSONObject();
                     try {
-                        obj.put("SSID", scan.SSID);
+                        String ssid_replaced = scan.SSID.replaceAll("^\"|\"$", "");
+                        if(ssid.equals(ssid_replaced)){
+                          obj.put("isConnected", true);
+                        } else {
+                          obj.put("isConnected", false);
+                        }
+                        obj.put("SSID", ssid_replaced);
+                        obj.put("NEWSSID", ssid);
                         obj.put("BSSID", scan.BSSID);
                         obj.put("frequency", scan.frequency);
                         obj.put("capabilities", scan.capabilities);
@@ -76,6 +88,16 @@ public class NetworkManager extends CordovaPlugin {
                  callbackContext.success(wifiLists);
                  return true;
         }
+
+        /***
+        *    getConnectionInfo - return Connection info
+        **/
+        private boolean getConnectionInfo(CallbackContext callbackContext, JSONArray data) {
+          WifiInfo wifiInfo = wifiManager.getConnectionInfo ();
+           String ssid = wifiInfo.getSSID();
+           callbackContext.success(ssid);
+           return true;
+       }
 
         /***
         * Config New Wifi
