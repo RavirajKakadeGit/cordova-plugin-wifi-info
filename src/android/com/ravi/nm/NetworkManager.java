@@ -72,8 +72,8 @@ public class NetworkManager extends CordovaPlugin {
                         } else {
                           obj.put("isConnected", false);
                         }
+                        obj.put("level" , wifiManager.calculateSignalLevel(scan.level, 5) );
                         obj.put("SSID", ssid_replaced);
-                        obj.put("NEWSSID", ssid);
                         obj.put("BSSID", scan.BSSID);
                         obj.put("frequency", scan.frequency);
                         obj.put("capabilities", scan.capabilities);
