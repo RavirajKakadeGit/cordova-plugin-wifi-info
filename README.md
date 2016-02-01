@@ -49,3 +49,16 @@ Add the network to the lists
 
 `win` and `fail` are callback functions
 
+
+#### `NetworkManager.getConfiguredNetworks(win,fail);`
+
+Retrieves a list of the available config networks as an array of objects:
+
+    [
+        {
+            "SSID": ssid
+        },
+        {
+           "SSID": ssid1
+        }
+    ]

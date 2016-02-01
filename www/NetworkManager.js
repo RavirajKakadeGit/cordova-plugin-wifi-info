@@ -11,6 +11,15 @@ var NetworkManager = {
     },
 
   /***
+   * getConfiguredNetworks
+   * @param win
+   * @param fail
+   */
+    getConfiguredNetworks : function(win,fail){
+      cordova.exec(win, fail, 'NetworkManager', 'getConfiguredNetworks', []);
+    },
+
+  /***
    * Get connection info
    */
   getConnectionInfo : function (win,fail) {

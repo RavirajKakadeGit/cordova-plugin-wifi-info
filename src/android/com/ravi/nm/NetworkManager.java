@@ -23,6 +23,7 @@ import android.util.Log;
 
 public class NetworkManager extends CordovaPlugin {
     private static final String Wifi_Lists = "getWifiList";
+    private static final String Wifi_Configured_Networks_Lists = "getConfiguredNetworks";
     private static final String ConfigNewWifi = "configNewWifi";
     private static final String Connection_Info = "getConnectionInfo";
     private WifiManager wifiManager;
@@ -47,6 +48,8 @@ public class NetworkManager extends CordovaPlugin {
                 return this.configNewWifiNetwork(callbackContext,data);
             } else if(action.equals(Connection_Info)){
                 return this.getConnectionInfo(callbackContext,data);
+            } else if(action.equals(Wifi_Configured_Networks_Lists)){
+                return this.getConfiguredNetworks(callbackContext,data);
             } else {
                 callbackContext.error("Incorrect action parameter: " + action);
             }
@@ -88,6 +91,27 @@ public class NetworkManager extends CordovaPlugin {
                  callbackContext.success(wifiLists);
                  return true;
         }
+
+                /***
+                *    getConfiguredNetworks - return Config wifi lists
+                **/
+                private boolean getConfiguredNetworks(CallbackContext callbackContext, JSONArray data) {
+                        List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+                        JSONArray wifiLists = new JSONArray();
+                        for( WifiConfiguration i : list ) {
+                            JSONObject obj = new JSONObject();
+                            try {
+                                obj.put("SSID", i.SSID);
+                                wifiLists.put(obj);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                callbackContext.error(e.toString());
+                                return false;
+                            }
+                        }
+                         callbackContext.success(wifiLists);
+                         return true;
+                }
 
         /***
         *    getConnectionInfo - return Connection info
