@@ -34,6 +34,9 @@ Retrieves a list of the available networks as an array of objects:
 
 Retrieves connected wifi information :
 
+#### `NetworkManager.getDHCPInfo(win,fail);`
+
+Retrieves DHCP information :
 
 #### `NetworkManager.addWifiNetwork(wifi, win, fail);`
 

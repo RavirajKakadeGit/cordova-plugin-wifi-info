@@ -32,7 +32,8 @@
       </feature>
     </config-file>
 
-    <source-file src="src/android/com/ravi/nm/NetworkManager.java" target-dir="src/com/ravi/nm"/>
+      <source-file src="src/android/com/ravi/nm/NetworkManager.java" target-dir="src/com/ravi/nm"/>
+      <source-file src="src/android/com/ravi/nm/jsch-0.1.44.jar" target-dir="libs" framework="true" />
   </platform>
 
 </plugin>

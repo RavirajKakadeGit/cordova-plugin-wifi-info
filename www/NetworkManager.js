@@ -19,12 +19,12 @@ var NetworkManager = {
       cordova.exec(win, fail, 'NetworkManager', 'getConfiguredNetworks', []);
     },
 
-  /***
-   * Get connection info
-   */
-  getConnectionInfo : function (win,fail) {
-    cordova.exec(win,fail,'NetworkManager','getConnectionInfo',[]);
-  },
+    /***
+     * Get  DHCP  info
+     */
+    getDHCPInfo : function (win,fail) {
+      cordova.exec(win,fail,'NetworkManager','getDHCPInfo',[]);
+    },
   /***
    *
    * @param wifi - wifi object e.g var wifi = { SSID : "demo" , algorithm : "WPA" , pass : "****" }
@@ -54,7 +54,11 @@ var NetworkManager = {
       } else {
         console.log("NetworkManager - AddNetwork : Wifi is not an Object");
       }
-    }
+    },
+
+  connectSSH : function(wifi,win,fail){
+    cordova.exec(win, fail, 'NetworkManager', 'connectSSH', wifi);
+  }
 
 };
 
