@@ -133,6 +133,7 @@ public class NetworkManager extends CordovaPlugin {
                         obj.put("level" , wifiManager.calculateSignalLevel(scan.level, 5) );
                         obj.put("SSID", ssid_replaced);
                         obj.put("BSSID", scan.BSSID);
+                        obj.put("macAddress", wifiInfo.getMacAddress());
                         obj.put("frequency", scan.frequency);
                         obj.put("capabilities", scan.capabilities);
                         wifiLists.put(obj);
