@@ -23,6 +23,9 @@ import android.util.Log;
 import java.net.InetAddress;
 import java.math.BigInteger;
 import java.nio.ByteOrder;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.lang.StringBuilder;
 
 
 import java.util.Properties;
@@ -102,8 +105,23 @@ public class NetworkManager extends CordovaPlugin {
                 channelssh.connect();
                 //channelssh.disconnect();
 
-                callbackContext.success("true");
-                return true;
+                InputStream inputStream = channelssh.getInputStream();
+
+               BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+               StringBuilder stringBuilder = new StringBuilder();
+
+               String line;
+
+               while ((line = bufferedReader.readLine()) != null)
+               {
+
+                   stringBuilder.append(line);
+                   stringBuilder.append('\n');
+
+               }
+                callbackContext.success(stringBuilder.toString());
+                 return true;
 
             } catch(Exception e){
                 e.printStackTrace();
