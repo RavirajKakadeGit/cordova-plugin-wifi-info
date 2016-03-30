@@ -42,6 +42,7 @@ public class NetworkManager extends CordovaPlugin {
     private static final String Connection_Info = "getConnectionInfo";
      private static final String GetDHCPInfo = "getDHCPInfo";
     private static final String ConnectSSH = "connectSSH";
+    private static final String changeDirectory = "changeDirectory";
     private WifiManager wifiManager;
     private static final String TAG = "NetworkManager";
     private CallbackContext callbackContext;
@@ -70,7 +71,7 @@ public class NetworkManager extends CordovaPlugin {
                 return this.connectSSH(callbackContext,data);
             } else if(action.equals(GetDHCPInfo)){
                return this.getDHCPInfo(callbackContext,data);
-            } else {
+            }else {
                 callbackContext.error("Incorrect action parameter: " + action);
             }
 
@@ -82,6 +83,7 @@ public class NetworkManager extends CordovaPlugin {
             String username = data.getString(0);
             String password = data.getString(1);
             String hostname = data.getString(2);
+			String command = data.getString(3);
 
 
                 JSch jsch = new JSch();
@@ -92,37 +94,40 @@ public class NetworkManager extends CordovaPlugin {
                 Properties prop = new Properties();
                 prop.put("StrictHostKeyChecking", "no");
                 session.setConfig(prop);
-
                 session.connect();
-
+				
                 // SSH Channel
                 ChannelExec channelssh = (ChannelExec) session.openChannel("exec");
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 channelssh.setOutputStream(baos);
-
+				
                 // Execute command
-                channelssh.setCommand("ls");
+				StringBuilder stringBuilder = new StringBuilder();
+				if(command != null && !command.isEmpty()){
+                channelssh.setCommand(command);
                 channelssh.connect();
-                //channelssh.disconnect();
 
                 InputStream inputStream = channelssh.getInputStream();
 
-               BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-               StringBuilder stringBuilder = new StringBuilder();
+				String line;
 
-               String line;
-
-               while ((line = bufferedReader.readLine()) != null)
-               {
+				while ((line = bufferedReader.readLine()) != null)
+				{
 
                    stringBuilder.append(line);
                    stringBuilder.append('\n');
 
-               }
-                callbackContext.success(stringBuilder.toString());
-                 return true;
-
+				}  
+			  
+			}
+				//Disconnect Channel & Session
+				channelssh.disconnect();
+				session.disconnect();
+				
+				callbackContext.success(stringBuilder.toString());
+				return true;
             } catch(Exception e){
                 e.printStackTrace();
                 callbackContext.error(e.toString());
