@@ -58,6 +58,16 @@ var NetworkManager = {
 
   connectSSH : function(wifi,win,fail){
     cordova.exec(win, fail, 'NetworkManager', 'connectSSH', wifi);
+  },
+
+  /***
+   * Set Wifi Sleep Policy
+   * @param options -  ["Never"]
+   * @param win
+   * @param fail
+   */
+  setWifiSleepPolicy : function(options,win,fail){
+    cordova.exec(win, fail, 'NetworkManager', 'setWifiSleepPolicy', options);
   }
 
 };

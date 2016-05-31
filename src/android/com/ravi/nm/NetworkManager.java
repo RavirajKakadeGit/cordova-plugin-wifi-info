@@ -33,6 +33,7 @@ import com.jcraft.jsch.*;
 import java.io.*;
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.ContentResolver;
 
 
 public class NetworkManager extends CordovaPlugin {
@@ -40,17 +41,21 @@ public class NetworkManager extends CordovaPlugin {
     private static final String Wifi_Configured_Networks_Lists = "getConfiguredNetworks";
     private static final String ConfigNewWifi = "configNewWifi";
     private static final String Connection_Info = "getConnectionInfo";
-     private static final String GetDHCPInfo = "getDHCPInfo";
+    private static final String GetDHCPInfo = "getDHCPInfo";
     private static final String ConnectSSH = "connectSSH";
+    private static final String WIFI_SLEEP_POLICY = "setWifiSleepPolicy";
     private static final String changeDirectory = "changeDirectory";
     private WifiManager wifiManager;
     private static final String TAG = "NetworkManager";
     private CallbackContext callbackContext;
+    private static Context context;
 
         @Override
         public void initialize(CordovaInterface cordova, CordovaWebView webView) {
             super.initialize(cordova, webView);
             this.wifiManager = (WifiManager) cordova.getActivity().getSystemService(Context.WIFI_SERVICE);
+            context =  cordova.getActivity().getApplicationContext();
+
         }
 
         @Override
@@ -58,6 +63,7 @@ public class NetworkManager extends CordovaPlugin {
                                 throws JSONException {
 
             this.callbackContext = callbackContext;
+
 
             if(action.equals(Wifi_Lists)) {
                 return this.getWifiDetails(callbackContext,data);
@@ -71,8 +77,10 @@ public class NetworkManager extends CordovaPlugin {
                 return this.connectSSH(callbackContext,data);
             } else if(action.equals(GetDHCPInfo)){
                return this.getDHCPInfo(callbackContext,data);
-            }else {
-                callbackContext.error("Incorrect action parameter: " + action);
+            } else if(action.equals(WIFI_SLEEP_POLICY)){
+               return this.setWifiSleepPolicy(callbackContext,data);
+            } else {
+               callbackContext.error("Incorrect action parameter: " + action);
             }
 
             return false;
@@ -395,6 +403,30 @@ public class NetworkManager extends CordovaPlugin {
             callbackContext.error(e.getMessage());
             return false;
           }
+       }
+
+       private boolean setWifiSleepPolicy(CallbackContext callbackContext, JSONArray data) {
+            try {
+                String policyName = data.getString(0);
+                if( policyName.equals("Never") ){
+                    ContentResolver cr = context.getContentResolver();
+                    int set = android.provider.Settings.System.WIFI_SLEEP_POLICY_NEVER;
+                    android.provider.Settings.System.putInt(cr, android.provider.Settings.System.WIFI_SLEEP_POLICY, set);
+                } else if( policyName.equals("Always")){
+                    ContentResolver cr = context.getContentResolver();
+                    int set = android.provider.Settings.System.WIFI_SLEEP_POLICY_DEFAULT;
+                    android.provider.Settings.System.putInt(cr, android.provider.Settings.System.WIFI_SLEEP_POLICY, set);
+                } else {
+                    ContentResolver cr = context.getContentResolver();
+                    int set = android.provider.Settings.System.WIFI_SLEEP_POLICY_NEVER_WHILE_PLUGGED;
+                    android.provider.Settings.System.putInt(cr, android.provider.Settings.System.WIFI_SLEEP_POLICY, set);
+                }
+                callbackContext.success(policyName);
+                return true;
+            } catch (Exception e) {
+                callbackContext.error(e.getMessage());
+                return false;
+            }
        }
 
 }
