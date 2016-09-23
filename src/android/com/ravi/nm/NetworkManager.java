@@ -26,6 +26,7 @@ import java.nio.ByteOrder;
 import java.io.InputStream;
 import java.io.BufferedReader;
 import java.lang.StringBuilder;
+import android.net.TrafficStats;
 
 
 import java.util.Properties;
@@ -42,6 +43,7 @@ public class NetworkManager extends CordovaPlugin {
     private static final String ConfigNewWifi = "configNewWifi";
     private static final String Connection_Info = "getConnectionInfo";
     private static final String GetDHCPInfo = "getDHCPInfo";
+	private static final String GetWifiUsage = "getWifiUsage";
     private static final String ConnectSSH = "connectSSH";
     private static final String WIFI_SLEEP_POLICY = "setWifiSleepPolicy";
     private static final String changeDirectory = "changeDirectory";
@@ -49,6 +51,9 @@ public class NetworkManager extends CordovaPlugin {
     private static final String TAG = "NetworkManager";
     private CallbackContext callbackContext;
     private static Context context;
+	private static final String SYSTEM_REBOOT_SHUTDOWN = "The system is going down for ";
+	private long mStartRX = 0;
+	private long mStartTX = 0;
 
         @Override
         public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -77,7 +82,9 @@ public class NetworkManager extends CordovaPlugin {
                 return this.connectSSH(callbackContext,data);
             } else if(action.equals(GetDHCPInfo)){
                return this.getDHCPInfo(callbackContext,data);
-            } else if(action.equals(WIFI_SLEEP_POLICY)){
+            } else if(action.equals(GetWifiUsage)){
+               return this.getWifiUsage(callbackContext,data);
+            }else if(action.equals(WIFI_SLEEP_POLICY)){
                return this.setWifiSleepPolicy(callbackContext,data);
             } else {
                callbackContext.error("Incorrect action parameter: " + action);
@@ -86,12 +93,27 @@ public class NetworkManager extends CordovaPlugin {
             return false;
         }
 
+		private boolean getWifiUsage(CallbackContext callbackContext, JSONArray data){
+		 try{
+			StringBuilder stringBuilder = new StringBuilder();
+			long rxBytes = (TrafficStats.getTotalRxBytes()- mStartRX)/1024/1024;			
+			stringBuilder.append(Long.toString(rxBytes));
+			callbackContext.success(stringBuilder.toString());
+				return true;
+		 }catch(Exception e){
+                e.printStackTrace();
+                callbackContext.error(e.toString());
+                return false;
+            }
+	 } 
+	 
         private boolean connectSSH(CallbackContext callbackContext, JSONArray data) {
         try{
             String username = data.getString(0);
             String password = data.getString(1);
             String hostname = data.getString(2);
 			String command = data.getString(3);
+			int flag = 0;
 
 
                 JSch jsch = new JSch();
@@ -112,9 +134,24 @@ public class NetworkManager extends CordovaPlugin {
                 // Execute command
 				StringBuilder stringBuilder = new StringBuilder();
 				if(command != null && !command.isEmpty()){
+					if(command.startsWith("sudo"))
+					{
+						channelssh.setPty(true);
+						channelssh.setCommand(command);
+						 OutputStream out=channelssh.getOutputStream();
+						 channelssh.connect();						 
+						 out.write((password+"\n").getBytes());
+						 out.flush();
+																	
+					}else{
                 channelssh.setCommand(command);
                 channelssh.connect();
-
+				}
+				if(username.equals("root") && (command.startsWith("reboot") || command.startsWith("shutdown"))){
+						stringBuilder.append(SYSTEM_REBOOT_SHUTDOWN+command);
+				}else if(!(username.equals("root")) && (command.startsWith("reboot") || command.startsWith("shutdown"))){
+					    stringBuilder.append(command+":Need to be root or use sudo reboot/shutdown password");
+				}
                 InputStream inputStream = channelssh.getInputStream();
 
 				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -123,12 +160,16 @@ public class NetworkManager extends CordovaPlugin {
 
 				while ((line = bufferedReader.readLine()) != null)
 				{
-
+					if ((command.startsWith("su") || command.startsWith("sudo")) && flag == 0)
+					{	
+						flag = 1;
+						continue;
+					}
                    stringBuilder.append(line);
                    stringBuilder.append('\n');
 
-				}  
-			  
+				} 
+				flag = 0;				
 			}
 				//Disconnect Channel & Session
 				channelssh.disconnect();

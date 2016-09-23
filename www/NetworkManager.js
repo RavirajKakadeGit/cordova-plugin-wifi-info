@@ -25,6 +25,12 @@ var NetworkManager = {
     getDHCPInfo : function (win,fail) {
       cordova.exec(win,fail,'NetworkManager','getDHCPInfo',[]);
     },
+	/***
+     * Get  WiFi Usage
+     */
+	getWifiUsage : function (win,fail) {
+      cordova.exec(win,fail,'NetworkManager','getWifiUsage',[]);
+    },
   /***
    *
    * @param wifi - wifi object e.g var wifi = { SSID : "demo" , algorithm : "WPA" , pass : "****" }
